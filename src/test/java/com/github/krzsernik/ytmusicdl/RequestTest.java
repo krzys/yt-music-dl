@@ -10,7 +10,7 @@ public class RequestTest {
     public Request requestPost;
 
     @Test
-    public void testBasicRequests() {
+    public void testSend() {
         requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
         String result = requestGet.send();
         assertNotNull("Basic GET Request", result);
