@@ -3,8 +3,7 @@ package com.github.krzsernik.ytmusicdl;
 import com.google.gson.JsonObject;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class RequestTest {
     public Request requestGet;
@@ -29,10 +28,10 @@ public class RequestTest {
     public void testSendJson() {
         requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
         JsonObject result = requestGet.sendJson();
-        assertNotNull("Basic GET Request", result);
+        assertEquals("Json GET Request", "https://httpbin.org/get", result.get("url").getAsString());
 
         requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
         result = requestPost.sendJson();
-        assertNotNull("Basic POST Request", result);
+        assertEquals("Json POST Request", "https://httpbin.org/post", result.get("url").getAsString());
     }
 }

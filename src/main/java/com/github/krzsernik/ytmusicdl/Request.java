@@ -1,5 +1,7 @@
 package com.github.krzsernik.ytmusicdl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -32,6 +34,22 @@ public class Request {
 
             if (entity != null) {
                 result = EntityUtils.toString(entity);
+            }
+            response.close();
+
+            return result;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public JsonObject sendJson() {
+        try (CloseableHttpResponse response = httpClient.execute(_request)) {
+            HttpEntity entity = response.getEntity();
+            JsonObject result = null;
+
+            if (entity != null) {
+                result = new Gson().fromJson(EntityUtils.toString(entity), JsonObject.class);
             }
             response.close();
 
