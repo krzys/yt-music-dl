@@ -28,10 +28,14 @@ public class Request {
     public String send() {
         try (CloseableHttpResponse response = httpClient.execute(_request)) {
             HttpEntity entity = response.getEntity();
+            String result = null;
 
             if (entity != null) {
-                return EntityUtils.toString(entity);
+                result = EntityUtils.toString(entity);
             }
+            response.close();
+
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
         }
