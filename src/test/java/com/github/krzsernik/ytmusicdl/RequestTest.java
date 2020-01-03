@@ -1,5 +1,6 @@
 package com.github.krzsernik.ytmusicdl;
 
+import com.google.gson.JsonObject;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +22,17 @@ public class RequestTest {
 
         requestGet = new Request("http://nonexisting.domain", Request.Method.GET);
         result = requestGet.send();
-        assertNull("Basic GET Request", result);
+        assertNull("Null GET Request", result);
+    }
+
+    @Test
+    public void testSendJson() {
+        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
+        JsonObject result = requestGet.sendJson();
+        assertNotNull("Basic GET Request", result);
+
+        requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
+        result = requestPost.sendJson();
+        assertNotNull("Basic POST Request", result);
     }
 }

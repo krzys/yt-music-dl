@@ -37,8 +37,7 @@ public class Request {
 
             return result;
         } catch (IOException e) {
-//            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 }
