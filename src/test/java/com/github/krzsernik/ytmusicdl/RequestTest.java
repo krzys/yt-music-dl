@@ -3,6 +3,8 @@ package com.github.krzsernik.ytmusicdl;
 import com.google.gson.JsonObject;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.junit.Assert.*;
 
 public class RequestTest {
@@ -37,6 +39,7 @@ public class RequestTest {
 
     class TestJsonClass {
         String url;
+        Map headers;
     }
 
     @Test
@@ -44,5 +47,13 @@ public class RequestTest {
         requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
         TestJsonClass classResult = requestGet.sendJsonClass(TestJsonClass.class);
         assertEquals("Serialized Json Request", "https://httpbin.org/get", classResult.url);
+    }
+
+    @Test
+    public void testSetHeader() {
+        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
+        requestGet.setHeader("Test", "secret");
+        TestJsonClass classResult = requestGet.sendJsonClass(TestJsonClass.class);
+        assertEquals("Set Header (JSON)", "secret", classResult.headers.get("Test"));
     }
 }

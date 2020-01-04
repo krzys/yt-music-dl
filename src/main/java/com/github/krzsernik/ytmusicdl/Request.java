@@ -27,6 +27,10 @@ public class Request {
         else if (method == Method.POST) _request = new HttpPost(url);
     }
 
+    public void setHeader(String key, String value) {
+        _request.setHeader(key, value);
+    }
+
     public String send() {
         try (CloseableHttpResponse response = httpClient.execute(_request)) {
             HttpEntity entity = response.getEntity();
