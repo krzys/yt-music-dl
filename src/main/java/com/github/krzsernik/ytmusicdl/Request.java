@@ -58,4 +58,20 @@ public class Request {
             return null;
         }
     }
+
+    public <T> T sendJsonClass(Class<T> tClass) {
+        try (CloseableHttpResponse response = httpClient.execute(_request)) {
+            HttpEntity entity = response.getEntity();
+            T result = null;
+
+            if (entity != null) {
+                result = new Gson().fromJson(EntityUtils.toString(entity), tClass);
+            }
+            response.close();
+
+            return result;
+        } catch (IOException e) {
+            return null;
+        }
+    }
 }
