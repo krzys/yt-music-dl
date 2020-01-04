@@ -34,4 +34,15 @@ public class RequestTest {
         result = requestPost.sendJson();
         assertEquals("Json POST Request", "https://httpbin.org/post", result.get("url").getAsString());
     }
+
+    class TestJsonClass {
+        String url;
+    }
+
+    @Test
+    public void testSendJsonClass() {
+        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
+        TestJsonClass classResult = requestGet.sendJsonClass(TestJsonClass.class);
+        assertEquals("Serialized Json Request", "https://httpbin.org/get", classResult.url);
+    }
 }
