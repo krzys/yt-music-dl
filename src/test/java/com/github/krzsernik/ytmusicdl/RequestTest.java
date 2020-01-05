@@ -40,6 +40,8 @@ public class RequestTest {
     class TestJsonClass {
         String url;
         Map headers;
+        Map form;
+        String data;
     }
 
     @Test
@@ -55,5 +57,18 @@ public class RequestTest {
         requestGet.setHeader("Test", "secret");
         TestJsonClass classResult = requestGet.sendJsonClass(TestJsonClass.class);
         assertEquals("Set Header (JSON)", "secret", classResult.headers.get("Test"));
+    }
+
+    @Test
+    public void testSetData() {
+        requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
+        requestPost.setData("TestArg", "secret");
+        TestJsonClass classResult = requestPost.sendJsonClass(TestJsonClass.class);
+        assertEquals("Json POST Request", "secret", classResult.form.get("TestArg"));
+
+        requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
+        requestPost.setData("testStringData");
+        classResult = requestPost.sendJsonClass(TestJsonClass.class);
+        assertEquals("Json POST Request", "testStringData", classResult.data);
     }
 }

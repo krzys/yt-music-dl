@@ -3,15 +3,22 @@ package com.github.krzsernik.ytmusicdl;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Request {
     enum Method {
@@ -21,6 +28,7 @@ public class Request {
 
     private static CloseableHttpClient httpClient = HttpClients.createDefault();
     private HttpRequestBase _request;
+    private List<NameValuePair> _formData;
 
     public Request(String url, Method method) {
         if (method == Method.GET) _request = new HttpGet(url);
@@ -31,7 +39,34 @@ public class Request {
         _request.setHeader(key, value);
     }
 
+    public boolean setData(String key, String value) {
+        if (_formData == null) _formData = new ArrayList<>();
+
+        _formData.add(new BasicNameValuePair(key, value));
+        return true;
+    }
+
+    public boolean setData(String data) {
+        try {
+            ((HttpPost) _request).setEntity(new StringEntity(data));
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
+    }
+
+    private void setData() {
+        if (_formData != null) {
+            try {
+                ((HttpPost) _request).setEntity(new UrlEncodedFormEntity(_formData));
+            } catch (UnsupportedEncodingException ignored) {
+            }
+        }
+    }
+
     public String send() {
+        setData();
+
         try (CloseableHttpResponse response = httpClient.execute(_request)) {
             HttpEntity entity = response.getEntity();
             String result = null;
@@ -48,6 +83,8 @@ public class Request {
     }
 
     public JsonObject sendJson() {
+        setData();
+
         try (CloseableHttpResponse response = httpClient.execute(_request)) {
             HttpEntity entity = response.getEntity();
             JsonObject result = null;
@@ -64,6 +101,8 @@ public class Request {
     }
 
     public <T> T sendJsonClass(Class<T> tClass) {
+        setData();
+
         try (CloseableHttpResponse response = httpClient.execute(_request)) {
             HttpEntity entity = response.getEntity();
             T result = null;
