@@ -3,6 +3,9 @@ package com.github.krzsernik.ytmusicdl;
 import com.google.gson.JsonObject;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -70,5 +73,19 @@ public class RequestTest {
         requestPost.setData("testStringData");
         classResult = requestPost.sendJsonClass(TestJsonClass.class);
         assertEquals("Json POST Request", "testStringData", classResult.data);
+    }
+
+    @Test
+    public void testDownload() throws IOException {
+        String filename = "httpbin-get.json";
+        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
+        boolean success = requestGet.download(filename);
+
+        assertTrue("Download successfully", success);
+
+        String content = requestGet.send();
+        String fileContent = new String(Files.readAllBytes(Paths.get(filename)));
+
+        assertEquals("Downloaded file content equal to get", content, fileContent);
     }
 }

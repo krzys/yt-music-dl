@@ -15,8 +15,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,6 +114,30 @@ public class Request {
             return result;
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    public boolean download(String filename) {
+        setData();
+
+        try (CloseableHttpResponse response = httpClient.execute(_request)) {
+            HttpEntity entity = response.getEntity();
+            String result = null;
+
+            if (entity != null) {
+                BufferedInputStream bis = new BufferedInputStream(entity.getContent());
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(filename)));
+
+                int inByte;
+                while ((inByte = bis.read()) != -1) bos.write(inByte);
+                bis.close();
+                bos.close();
+            }
+            response.close();
+
+            return true;
+        } catch (IOException e) {
+            return false;
         }
     }
 }
