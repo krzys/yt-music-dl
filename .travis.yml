@@ -1,5 +1,5 @@
 language: java
-jdk: oraclejdk1.8
+jdk: openjdk1.8
 
 script: "mvn cobertura:cobertura"
 
