@@ -24,6 +24,14 @@ public class RequestTest {
         result = requestPost.send();
         assertNotNull("Basic POST Request", result);
 
+        requestGet = Request.Get("http://httpbin.org/get");
+        result = requestGet.send();
+        assertNotNull("Basic GET Request", result);
+
+        requestPost = Request.Post("http://httpbin.org/post");
+        result = requestPost.send();
+        assertNotNull("Basic POST Request", result);
+
         requestGet = new Request("http://nonexisting.domain", Request.Method.GET);
         result = requestGet.send();
         assertNull("Null GET Request", result);
@@ -87,5 +95,7 @@ public class RequestTest {
         String fileContent = new String(Files.readAllBytes(Paths.get(filename)));
 
         assertEquals("Downloaded file content equal to get", content, fileContent);
+
+        Files.deleteIfExists(Paths.get(filename));
     }
 }

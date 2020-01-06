@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Request {
-    enum Method {
+    public enum Method {
         GET,
         POST
     }
@@ -28,6 +28,14 @@ public class Request {
     private static CloseableHttpClient httpClient = HttpClients.createDefault();
     private HttpRequestBase _request;
     private List<NameValuePair> _formData;
+
+    public static Request Get(String url) {
+        return new Request(url, Method.GET);
+    }
+
+    public static Request Post(String url) {
+        return new Request(url, Method.POST);
+    }
 
     public Request(String url, Method method) {
         if (method == Method.GET) _request = new HttpGet(url);
