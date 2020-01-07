@@ -130,7 +130,6 @@ public class Request {
 
         try (CloseableHttpResponse response = httpClient.execute(_request)) {
             HttpEntity entity = response.getEntity();
-            String result = null;
 
             if (entity != null) {
                 BufferedInputStream bis = new BufferedInputStream(entity.getContent());
