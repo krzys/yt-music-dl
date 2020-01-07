@@ -3,8 +3,9 @@ package com.github.krzsernik.ytmusicdl;
 import com.github.krzsernik.ytmusicdl.data.Video;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.ArrayList;
+
+import static org.junit.Assert.*;
 
 public class VideoTest {
     @Test
@@ -13,5 +14,6 @@ public class VideoTest {
 
         assertNotNull(video);
         assertEquals("58LVoLDBspc", video.videoId);
+        assertNotEquals(new ArrayList<>(), video.formats);
     }
 }
