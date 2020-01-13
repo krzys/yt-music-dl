@@ -25,7 +25,7 @@ public class Request {
         POST
     }
 
-    private static CloseableHttpClient httpClient = HttpClients.createDefault();
+    static CloseableHttpClient httpClient = HttpClients.createDefault();
     private HttpRequestBase _request;
     private List<NameValuePair> _formData;
 
