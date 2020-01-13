@@ -28,6 +28,7 @@ public class Request {
     static CloseableHttpClient httpClient = HttpClients.createDefault();
     private HttpRequestBase _request;
     private List<NameValuePair> _formData;
+    private HttpEntity _httpEntity;
 
     public static Request Get(String url) {
         return new Request(url, Method.GET);
@@ -75,11 +76,11 @@ public class Request {
         setData();
 
         try (CloseableHttpResponse response = httpClient.execute(_request)) {
-            HttpEntity entity = response.getEntity();
+            _httpEntity = response.getEntity();
             String result = null;
 
-            if (entity != null) {
-                result = EntityUtils.toString(entity);
+            if (_httpEntity != null) {
+                result = EntityUtils.toString(_httpEntity);
             }
             response.close();
 
@@ -146,5 +147,9 @@ public class Request {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public HttpEntity getHttpEntity() {
+        return _httpEntity;
     }
 }
