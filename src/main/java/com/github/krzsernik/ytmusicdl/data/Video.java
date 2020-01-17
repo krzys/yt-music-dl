@@ -25,7 +25,7 @@ public class Video {
 
     public static Video GetVideo(String videoId) throws Exception {
         Request videoInfoRequest = Request.Get(GET_VIDEO_INFO_URL + videoId);
-        String content = videoInfoRequest.send();
+        String content = videoInfoRequest.get();
 
         if (content == null) {
             throw new Exception("Couldn't fetch video info.");

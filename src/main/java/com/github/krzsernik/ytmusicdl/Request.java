@@ -20,15 +20,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Request {
+    final private static Gson JSON = new Gson();
+
     public enum Method {
         GET,
         POST
     }
 
     static CloseableHttpClient httpClient = HttpClients.createDefault();
-    private HttpRequestBase _request;
+    HttpRequestBase _request;
     private List<NameValuePair> _formData;
     private HttpEntity _httpEntity;
+    String _response;
+
+    private boolean _isSent = false;
 
     public static Request Get(String url) {
         return new Request(url, Method.GET);
@@ -72,81 +77,66 @@ public class Request {
         }
     }
 
-    public String send() {
+    CloseableHttpResponse _execute() throws IOException {
+        return httpClient.execute(_request);
+    }
+
+    public void send() {
+        _isSent = true;
         setData();
 
-        try (CloseableHttpResponse response = httpClient.execute(_request)) {
+        try (CloseableHttpResponse response = _execute()) {
             _httpEntity = response.getEntity();
-            String result = null;
-
-            if (_httpEntity != null) {
-                result = EntityUtils.toString(_httpEntity);
-            }
-            response.close();
-
-            return result;
-        } catch (IOException e) {
-            return null;
+            _response = EntityUtils.toString(_httpEntity);
+        } catch (IOException ignored) {
         }
     }
 
-    public JsonObject sendJson() {
-        setData();
+    public String get() {
+        if (!_isSent) send();
 
-        try (CloseableHttpResponse response = httpClient.execute(_request)) {
-            HttpEntity entity = response.getEntity();
-            JsonObject result = null;
-
-            if (entity != null) {
-                result = new Gson().fromJson(EntityUtils.toString(entity), JsonObject.class);
-            }
-            response.close();
-
-            return result;
-        } catch (IOException e) {
-            return null;
-        }
+        return _response;
     }
 
-    public <T> T sendJsonClass(Class<T> tClass) {
-        setData();
+    public JsonObject getJson() {
+        if (!_isSent) send();
 
-        try (CloseableHttpResponse response = httpClient.execute(_request)) {
-            HttpEntity entity = response.getEntity();
-            T result = null;
+        return JSON.fromJson(_response, JsonObject.class);
+    }
 
-            if (entity != null) {
-                result = new Gson().fromJson(EntityUtils.toString(entity), tClass);
-            }
-            response.close();
+    public <T> T getJson(Class<T> tClass) {
+        if (!_isSent) send();
 
-            return result;
-        } catch (IOException e) {
-            return null;
-        }
+        return JSON.fromJson(_response, tClass);
     }
 
     public boolean download(String filename) {
+        _isSent = true;
         setData();
 
-        try (CloseableHttpResponse response = httpClient.execute(_request)) {
-            HttpEntity entity = response.getEntity();
+        try (CloseableHttpResponse response = _execute()) {
+            _httpEntity = response.getEntity();
 
-            if (entity != null) {
-                BufferedInputStream bis = new BufferedInputStream(entity.getContent());
+            if (_httpEntity != null) {
+                BufferedInputStream bis = new BufferedInputStream(_httpEntity.getContent());
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(filename)));
 
-                int inByte;
-                while ((inByte = bis.read()) != -1) bos.write(inByte);
+                byte[] contents = new byte[1024];
+                int bytesRead;
+                _response = "";
+
+                while ((bytesRead = bis.read(contents)) != -1) {
+                    bos.write(contents);
+                    _response += new String(contents, 0, bytesRead);
+                }
                 bis.close();
                 bos.close();
-            }
-            response.close();
 
-            return true;
-        } catch (IOException e) {
-            return false;
+                return true;
+            }
+        } catch (IOException ignored) {
         }
+        return false;
     }
 
     public HttpEntity getHttpEntity() {
