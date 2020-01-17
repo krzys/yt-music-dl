@@ -15,37 +15,51 @@ public class RequestTest {
     public Request requestPost;
 
     @Test
-    public void testSend() {
-        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
-        String result = requestGet.send();
-        assertNotNull("Basic GET Request", result);
-
-        requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
-        result = requestPost.send();
-        assertNotNull("Basic POST Request", result);
-
+    public void testGetRequest() {
         requestGet = Request.Get("http://httpbin.org/get");
-        result = requestGet.send();
-        assertNotNull("Basic GET Request", result);
+        requestGet.send();
 
-        requestPost = Request.Post("http://httpbin.org/post");
-        result = requestPost.send();
-        assertNotNull("Basic POST Request", result);
-
-        requestGet = new Request("http://nonexisting.domain", Request.Method.GET);
-        result = requestGet.send();
-        assertNull("Null GET Request", result);
+        String resultGet = requestGet.get();
+        assertNotNull("Basic GET Request", resultGet);
     }
 
     @Test
-    public void testSendJson() {
-        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
-        JsonObject result = requestGet.sendJson();
-        assertEquals("Json GET Request", "https://httpbin.org/get", result.get("url").getAsString());
+    public void testPostRequest() {
+        requestPost = Request.Post("http://httpbin.org/post");
+        requestPost.send();
 
-        requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
-        result = requestPost.sendJson();
-        assertEquals("Json POST Request", "https://httpbin.org/post", result.get("url").getAsString());
+        String resultPost = requestPost.get();
+        assertNotNull("Basic POST Request", resultPost);
+    }
+
+    @Test
+    public void testPostRequestWithFormData() {
+        requestPost = Request.Post("http://httpbin.org/post");
+        requestPost.setData("test", "data");
+
+        JsonObject result = requestPost.getJson();
+        assertNotNull("POST Request", result);
+
+        String dataValue = result.getAsJsonObject("form").get("test").getAsString();
+        assertEquals("POST Request Form Data", "data", dataValue);
+    }
+
+    @Test
+    public void testPostRequestWithStringData() {
+        requestPost = Request.Post("http://httpbin.org/post");
+        requestPost.setData("test data");
+
+        JsonObject result = requestPost.getJson();
+        String dataValue = result.get("data").getAsString();
+        assertEquals("POST Request String Data", "test data", dataValue);
+    }
+
+    @Test
+    public void testJsonResponse() {
+        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
+
+        JsonObject result = requestGet.getJson();
+        assertEquals("JSON Response", "https://httpbin.org/get", result.get("url").getAsString());
     }
 
     class TestJsonClass {
@@ -56,46 +70,48 @@ public class RequestTest {
     }
 
     @Test
-    public void testSendJsonClass() {
+    public void testJsonClassResponse() {
         requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
-        TestJsonClass classResult = requestGet.sendJsonClass(TestJsonClass.class);
-        assertEquals("Serialized Json Request", "https://httpbin.org/get", classResult.url);
+
+        TestJsonClass classResult = requestGet.getJson(TestJsonClass.class);
+        assertEquals("Own Class Json Response", "https://httpbin.org/get", classResult.url);
     }
 
     @Test
-    public void testSetHeader() {
+    public void testRequestWithHeader() {
         requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
         requestGet.setHeader("Test", "secret");
-        TestJsonClass classResult = requestGet.sendJsonClass(TestJsonClass.class);
+
+        TestJsonClass classResult = requestGet.getJson(TestJsonClass.class);
         assertEquals("Set Header (JSON)", "secret", classResult.headers.get("Test"));
-    }
-
-    @Test
-    public void testSetData() {
-        requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
-        requestPost.setData("TestArg", "secret");
-        TestJsonClass classResult = requestPost.sendJsonClass(TestJsonClass.class);
-        assertEquals("Json POST Request", "secret", classResult.form.get("TestArg"));
-
-        requestPost = new Request("http://httpbin.org/post", Request.Method.POST);
-        requestPost.setData("testStringData");
-        classResult = requestPost.sendJsonClass(TestJsonClass.class);
-        assertEquals("Json POST Request", "testStringData", classResult.data);
     }
 
     @Test
     public void testDownload() throws IOException {
         String filename = "httpbin-get.json";
+
         requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
         boolean success = requestGet.download(filename);
 
-        assertTrue("Download successfully", success);
+        assertTrue("Download success", success);
 
-        String content = requestGet.send();
-        String fileContent = new String(Files.readAllBytes(Paths.get(filename)));
+        String content = requestGet.get().trim();
+        String fileContent = new String(
+                Files.readAllBytes(
+                        Paths.get(filename)
+                )
+        ).trim();
 
         assertEquals("Downloaded file content equal to get", content, fileContent);
 
         Files.deleteIfExists(Paths.get(filename));
+    }
+
+    @Test
+    public void testHttpEntity() {
+        requestGet = Request.Get("http://httpbin.org/get");
+        requestGet.send();
+
+        assertNotNull("HTTP Entity not null", requestGet.getHttpEntity());
     }
 }
