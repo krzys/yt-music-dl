@@ -9,6 +9,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -28,12 +30,15 @@ public class Request {
     }
 
     static CloseableHttpClient httpClient = HttpClients.createDefault();
-    HttpRequestBase _request;
+    static HttpClientContext context = new HttpClientContext();
+
     private List<NameValuePair> _formData;
     private HttpEntity _httpEntity;
+    private boolean _isSent = false;
+    HttpRequestBase _request;
     String _response;
 
-    private boolean _isSent = false;
+    private boolean _useCookies = true;
 
     public static Request Get(String url) {
         return new Request(url, Method.GET);
@@ -46,6 +51,10 @@ public class Request {
     public Request(String url, Method method) {
         if (method == Method.GET) _request = new HttpGet(url);
         else if (method == Method.POST) _request = new HttpPost(url);
+    }
+
+    public void setUseCookies(boolean use) {
+        _useCookies = use;
     }
 
     public void setHeader(String key, String value) {
@@ -78,6 +87,9 @@ public class Request {
     }
 
     CloseableHttpResponse _execute() throws IOException {
+        if (_useCookies) {
+            return httpClient.execute(_request, context);
+        }
         return httpClient.execute(_request);
     }
 
@@ -141,5 +153,9 @@ public class Request {
 
     public HttpEntity getHttpEntity() {
         return _httpEntity;
+    }
+
+    public List<Cookie> getCookies() {
+        return context.getCookieStore().getCookies();
     }
 }
