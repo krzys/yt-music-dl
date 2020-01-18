@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -30,7 +31,7 @@ public class Request {
     }
 
     static CloseableHttpClient httpClient = HttpClients.createDefault();
-    static HttpClientContext context = new HttpClientContext();
+    static HttpClientContext context = HttpClientContext.create();
 
     private List<NameValuePair> _formData;
     private HttpEntity _httpEntity;
@@ -49,6 +50,10 @@ public class Request {
     }
 
     public Request(String url, Method method) {
+        if (context.getCookieStore() == null) {
+            context.setCookieStore(new BasicCookieStore());
+        }
+
         if (method == Method.GET) _request = new HttpGet(url);
         else if (method == Method.POST) _request = new HttpPost(url);
     }
@@ -61,19 +66,15 @@ public class Request {
         _request.setHeader(key, value);
     }
 
-    public boolean setData(String key, String value) {
+    public void setData(String key, String value) {
         if (_formData == null) _formData = new ArrayList<>();
-
         _formData.add(new BasicNameValuePair(key, value));
-        return true;
     }
 
-    public boolean setData(String data) {
+    public void setData(String data) {
         try {
             ((HttpPost) _request).setEntity(new StringEntity(data));
-            return true;
         } catch (UnsupportedEncodingException e) {
-            return false;
         }
     }
 
