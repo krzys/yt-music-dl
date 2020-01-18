@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class VideoTest {
     @Test
     public void testGetVideo() throws Exception {
-        Video video = Video.GetVideo("58LVoLDBspc");
+        Video.VideoInfo video = Video.GetVideoInfo("58LVoLDBspc");
 
         assertNotNull(video);
         assertEquals("58LVoLDBspc", video.videoId);

@@ -108,10 +108,34 @@ public class RequestTest {
     }
 
     @Test
+    public void testDownloadFail() throws IOException {
+        String filename = ".";
+
+        requestGet = new Request("http://httpbin.org/get", Request.Method.GET);
+        boolean success = requestGet.download(filename);
+
+        assertFalse("Download fail", success);
+    }
+
+    @Test
     public void testHttpEntity() {
         requestGet = Request.Get("http://httpbin.org/get");
         requestGet.send();
 
         assertNotNull("HTTP Entity not null", requestGet.getHttpEntity());
+    }
+
+    @Test
+    public void testGetCookies() {
+        requestGet = Request.Get("http://httpbin.org/cookies/set/test/data");
+        requestGet.setUseCookies(false);
+        requestGet.send();
+
+        assertTrue("Cookies count (not used)", requestGet.getCookies().size() == 0);
+
+        requestGet = Request.Get("http://httpbin.org/cookies/set/test/data");
+        requestGet.send();
+
+        assertTrue("Cookies count", requestGet.getCookies().size() > 0);
     }
 }
