@@ -16,14 +16,15 @@ public class Video {
     public final static String GET_VIDEO_INFO_URL = "http://youtube.com/get_video_info?video_id=";
     public final static Gson JSON = new Gson();
 
-    public String videoId;
-    public String title;
-    public String author;
-    public String shortDescription;
+    public class VideoInfo {
+        public String videoId;
+        public String title;
+        public String author;
+        public String shortDescription;
+        public List<Format> formats;
+    }
 
-    public List<Format> formats;
-
-    public static Video GetVideo(String videoId) throws Exception {
+    public static VideoInfo GetVideoInfo(String videoId) throws Exception {
         Request videoInfoRequest = Request.Get(GET_VIDEO_INFO_URL + videoId);
         String content = videoInfoRequest.get();
 
@@ -46,7 +47,7 @@ public class Video {
         JsonElement videoDetails = playerResponse.get("videoDetails");
 
         // cast JsonElement to Video class
-        Video video = JSON.fromJson(videoDetails, Video.class);
+        VideoInfo video = JSON.fromJson(videoDetails, VideoInfo.class);
 
         JsonArray formats = playerResponse.getAsJsonObject("streamingData")
                 .getAsJsonArray("adaptiveFormats");
